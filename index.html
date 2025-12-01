@@ -1,0 +1,752 @@
+<!-- Mostly auto generated code using chatgpt-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Layering Analysis</title>
+  <link rel="icon" type="image/x-icon" href="logo.ico"/>
+<style>
+/* -------------------------------------------------- */
+/* GLOBAL */
+/* -------------------------------------------------- */
+body {
+  font-family: Inter, sans-serif;
+  background: #f3f4f8;
+  padding: 40px;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+h1 {
+  font-size: 38px;
+  font-weight: 800;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  font-size: 18px;
+  opacity: 0.85;
+  margin-bottom: 40px;
+  line-height: 1.55;
+  text-align: justify;
+}
+
+/* -------------------------------------------------- */
+/* CARDS */
+/* -------------------------------------------------- */
+.card {
+  background: white;
+  padding: 22px 26px;
+  border-radius: 14px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  margin-bottom: 26px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+/* -------------------------------------------------- */
+/* INPUTS */
+/* -------------------------------------------------- */
+input, select, button {
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.input-small {
+  max-width: 180px;
+}
+
+.input-medium {
+  max-width: 240px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+/* -------------------------------------------------- */
+/* TABLE */
+/* -------------------------------------------------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th, td {
+  padding: 10px 6px;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.action-btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.action-edit { background:#f0ad4e; }
+.action-delete { background:#d9534f; }
+#riskRewardCard{
+    visibility: hidden;
+}
+#layersList{
+    visibility: hidden;
+}
+/* -------------------------------------------------- */
+/* BUTTONS */
+/* -------------------------------------------------- */
+button {
+  cursor: pointer;
+  background: #4169e1;
+  color: white;
+  font-weight: 600;
+  border: none;
+}
+
+button:hover {
+  background: #3556c7;
+}
+
+/* -------------------------------------------------- */
+/* SCHEME CARDS */
+/* -------------------------------------------------- */
+.scheme-cards {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 26px;
+}
+
+.scheme-card {
+  flex: 1;
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: transform .15s ease;
+}
+
+.scheme-card:hover {
+  transform: translateY(-3px);
+}
+
+.scheme-card h3 {
+  margin: 0;
+  font-size: 19px;
+}
+
+/* -------------------------------------------------- */
+/* RISK/REWARD BOXES (matching styles everywhere) */
+/* -------------------------------------------------- */
+.rr-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.rr-box {
+  position: relative;
+  padding: 14px 16px;
+  border-radius: 10px;
+  min-width: 150px;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Badge */
+.rr-badge {
+  position: absolute;
+  top: -8px;
+  left: 10px;
+  background: #00000015;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+/* Colors */
+.rr-risk {
+  background: #ffefef;
+  border: 1px solid #ffc9c9;
+  color: #b30000;
+}
+
+.rr-reward {
+  background: #ecffee;
+  border: 1px solid #b3e8bd;
+  color: #0d7f23;
+}
+
+/* -------------------------------------------------- */
+/* DISCLAIMER */
+/* -------------------------------------------------- */
+.disclaimer {
+  opacity: 0.7;
+  font-size: 13px;
+  margin-top: 30px;
+}
+
+.beautiful-form {
+  padding: 20px 24px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+.section-title {
+  margin: 0 0 16px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px 20px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.form-field input {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.form-field input:focus {
+  outline: none;
+  border-color: #4a8bfd;
+  box-shadow: 0 0 4px rgba(74, 139, 253, 0.35);
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.cta-container {
+  display: flex;
+  justify-content: center;
+  margin: 40px 0;
+}
+
+/* CTA Button Style */
+.cta-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #4169e1;
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 14px 22px;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 5px 15px rgba(65, 105, 225, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cta-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(65, 105, 225, 0.4);
+}
+
+/* Logo inside button */
+.cta-logo {
+  width: 24px;
+  height: 24px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Discover Layering Power</h1>
+<p class="subtitle">
+Instead of entering a trade all at once, layering allows you to place structured entries across your zone.
+The result: lower risk, smoother drawdowns, and stronger reward potential when the market moves within your entry zone.
+Test it with this interactive tool and see how layering can improve your outcomes — even on a small account.
+</p>
+
+<div class="card beautiful-form">
+  <h2 class="section-title">Your Last Trade Setup</h2>
+
+  <div class="form-grid">
+    
+    <div class="form-field">
+      <label for="entryStart">Entry Zone Start</label>
+      <input id="entryStart" type="number" step="0.00001" value="4194" />
+    </div>
+
+    <div class="form-field">
+      <label for="entryEnd">Entry Zone End</label>
+      <input id="entryEnd" type="number" step="0.00001" value="4191" />
+    </div>
+
+    <div class="form-field">
+      <label for="stopLoss">Stop Loss</label>
+      <input id="stopLoss" type="number" step="0.00001" value="4188"/>
+    </div>
+
+    <div class="form-field">
+      <label for="tpList">Take Profits</label>
+      <input id="tpList" type="text" value="4196,4198,4200" placeholder="List of TPs comma-separated"/>
+    </div>
+
+    <div class="form-field">
+      <label for="pipSize">Symbol Pip Size</label>
+      <input id="pipSize" type="number" value="0.01" placeholder="For XAUUSD, it is 0.01"/>
+    </div>
+
+    <div class="form-field">
+      <label for="totalVolume">Total Lot Size</label>
+      <input id="totalVolume" type="number" value="0.1"/>
+    </div>
+
+  </div>
+</div>
+
+<h2 class="section-title">Expected Risks & Rewards for 3 Simple Layering Approaches</h2>
+<div class="scheme-cards">
+
+  <div class="scheme-card">
+    <h3>📌 100% at Entry Price</h3>
+    <p>Full position at zone start</p>
+    <div id="result_single" class="scheme-result"></div>
+  </div>
+
+  <div class="scheme-card">
+    <h3>🎯 Balanced Scaling</h3>
+    <p>50% at start + 5 × 10% uniformly distributed</p>
+    <div id="result_6layers" class="scheme-result"></div>
+  </div>
+
+  <div class="scheme-card">
+    <h3>🧩 Smooth Scaling</h3>
+    <p>10 × 10% uniformly distributed</p>
+    <div id="result_10layers" class="scheme-result"></div>
+  </div>
+
+</div>
+
+<h2 class="section-title"> Do It Yourself: Create and Test a Layer Scheme</h2>
+<div class="card beautiful-form">
+  <h2 class="section-title">Add or Modify Layers</h2>
+    <div class="form-grid">
+<div class="form-field">
+  <label>Type of layer</label>
+  <select id="layerType">
+    <option value="percent">% of the zone</option>
+    <option value="price">Absolute Price</option>
+  </select>
+  </div>
+<div class="form-field">
+  <label id="labelLayerValue">% of the zone*</label>
+  <input id="layerValue" type="number" min="0" value="0"/>
+</div>
+<div class="form-field">
+  <label>Portion of total lot (%)*</label>
+  <input id="layerPortion" type="number" min="1" max="100" value="50"/>
+  </div>
+<div class="form-field">
+  <label>Stop at TP*</label>
+  <select id="layerStopTP"></select>
+</div>
+</div>
+
+  <div class="button-row">
+    <button id="saveLayer">Save Layer</button>
+  </div>
+</div>
+
+
+<div class="card" id = "layersList">
+  <h2 class="section-title">Layers</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Value</th>
+        <th>Portion (%)</th>
+        <th>Stops at TP</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="layerTable"></tbody>
+  </table>
+</div>
+
+
+<div class="card" id ="riskRewardCard">
+  <h2 style="display:flex; justify-content:space-between; align-items:center;">
+    Risk & Rewards
+    <button id="refreshRR" style="width:auto;">Refresh</button>
+  </h2>
+  <div class="rr-container" id="riskReward"></div>
+</div>
+
+<div class="cta-container">
+  <a href="https://t.me/vincentflt?text=I+want+to+try+Layoo%21" target="_blank" class="cta-button">
+    <img src="logo.ico" alt="Layoo Logo" class="cta-logo">
+    <span>Start Layering Your Trades With Layoo - 1 Week Free Demo - Contact us</span>
+  </a>
+</div>
+
+<p class="disclaimer">
+  Disclaimer: Expected risk and rewards in pips are computed based on the assumption that all layers will be activated. Financial values are estimates. Pip conversion depends on your broker.
+  Default value used is 0.8625 €/pip per lot of 1.
+</p>
+
+
+<script>
+/* ==============================
+   EXISTING VARIABLES
+=================================*/
+let layers = [];
+let editingIndex = null;
+
+const AVERAGE_GAIN_PIP_VALUE = 0.8625;
+const AVERAGE_LOSS_PIP_VALUE = 0.8625;
+
+/* ===========================================================
+   HELPERS FOR RISK/REWARD (unchanged, using your code)
+=========================================================== */
+function accumulateLowerTPRewards(o, isBuy) {
+  const sorted = Object.keys(o).map(Number).sort((a, b) => {return isBuy? a - b: b - a});
+  let cum = 0;
+  sorted.forEach(tp => {
+    cum += o[tp];
+    o[tp] = cum;
+  });
+  return o;
+}
+
+function computeRiskRewardForLayers(tempLayers) {
+  const entryStart = parseFloat(entryStartEl.value);
+  const entryEnd = parseFloat(entryEndEl.value);
+  const sl = parseFloat(stopLossEl.value);
+  const pipSize = parseFloat(pipSizeEl.value);
+  const totalVolume = parseFloat(totalVolumeEl.value);
+  const isBuy = entryStart > entryEnd
+
+  const multiplier = 1 / pipSize;
+  const slInPips = Math.abs(entryStart - sl) * multiplier;
+  const entryZoneSize = Math.abs(entryStart - entryEnd) * multiplier;
+
+  const tps = tpListEl.value.split(",").map(v=>parseFloat(v.trim())).filter(v=>!isNaN(v));
+  const sortedTPs = [...tps].sort((a, b) => {return isBuy? a - b: b - a});
+
+  let totalRisk = 0;
+  let rewards = {};
+
+  tempLayers.forEach(l => {
+    const weight = l.portion / 100;
+
+    const entryLevel = l.type === "percent"
+        ? l.value/100
+        : Math.abs(entryStart - l.value) * multiplier / entryZoneSize;
+
+    totalRisk += weight * (slInPips - entryLevel * entryZoneSize);
+    const layerTp = l.stopTP;
+    let previousTp = 0
+    sortedTPs.forEach(tp => {
+        if((isBuy && tp > layerTp) || (!isBuy && tp < layerTp)){
+            return
+        } else{
+            if (previousTp == 0){
+                const tpInPips = Math.abs(tp - entryStart) * multiplier;
+                const reward = weight * (entryLevel * entryZoneSize + tpInPips);
+                if (rewards[tpInPips] === undefined)
+                    rewards[tpInPips] = reward;
+                    else
+                    rewards[tpInPips] += reward;
+            } else {
+                const tpInPips = Math.abs(tp - entryStart) * multiplier;
+                const diffToPreviousTpInpips = Math.abs(tp - previousTp) * multiplier;
+                const reward = weight * (diffToPreviousTpInpips);
+                if (rewards[tpInPips] === undefined)
+                    rewards[tpInPips] = reward;
+                    else
+                    rewards[tpInPips] += reward;
+
+            }
+            
+        }
+        previousTp = tp
+    })
+  });
+    accumulateLowerTPRewards(rewards, isBuy);
+
+  return { totalRisk, rewards, totalVolume };
+}
+
+/* ===========================================================
+   NEW: COMPUTE FIXED SCHEMES
+=========================================================== */
+
+function computeFixedScheme(type) {
+  let temp = [];
+  const entryStart = parseFloat(entryStartEl.value);
+  const tpList = tpListEl.value.split(",").map(v=>parseFloat(v.trim())).filter(v=>!isNaN(v))
+  const tpsNumber = tpList.length;
+  if (type === "single") {
+    // One layer at beginning of zone
+    temp.push({ type:"percent", value:0, portion:100, stopTP:tpList[tpsNumber-1] });
+  }
+
+  else if (type === "6layers") {
+    temp.push({ type:"percent", value:0, portion:50, stopTP:tpList[tpsNumber-1] });
+    for (let i = 1; i <= 5; i++) {
+      temp.push({ type:"percent", value:i*20, portion:10, stopTP:tpList[tpsNumber-1]});
+    }
+  }
+
+  else if (type === "10layers") {
+    for (let i = 0; i < 10; i++) {
+      temp.push({ type:"percent", value:i*10, portion:10, stopTP:tpList[tpsNumber-1]});
+    }
+  }
+
+  // Compute risk/reward with the existing engine
+  const { totalRisk, rewards, totalVolume } = computeRiskRewardForLayers(temp);
+
+  const riskEur = totalRisk * AVERAGE_LOSS_PIP_VALUE * totalVolume;
+
+  // Update card result
+  const el = document.getElementById(
+    type === "single" ? "result_single" :
+    type === "6layers" ? "result_6layers" : "result_10layers"
+  );
+console.log(rewards)
+let html = `<div class="rr-container">`;
+
+// RISK BOX
+html += `
+<div class="rr-box rr-risk">
+  <div class="rr-badge">Risk</div>
+  ${totalRisk.toFixed(2)} pips<br>
+  (~${riskEur.toFixed(2)}€)
+</div>
+`;
+  Object.keys(rewards).forEach((tp,index) =>{
+    const rewardEur = rewards[tp] * AVERAGE_GAIN_PIP_VALUE * totalVolume;
+  html += `
+  <div class="rr-box rr-reward">
+    <div class="rr-badge">Reward at TP${index + 1}</div>
+    ${rewards[tp].toFixed(2)} pips<br>
+    (~${rewardEur.toFixed(2)}€)
+  </div>
+  `;
+  })
+  el.innerHTML = html
+}
+
+/* ===========================================================
+   EXISTING DOM ELEMENTS
+=========================================================== */
+
+const entryStartEl = document.getElementById("entryStart");
+const entryEndEl = document.getElementById("entryEnd");
+const stopLossEl = document.getElementById("stopLoss");
+const tpListEl = document.getElementById("tpList");
+const pipSizeEl = document.getElementById("pipSize");
+const totalVolumeEl = document.getElementById("totalVolume");
+
+/* ===========================================================
+   EXISTING LAYER TABLE & SAVE LOGIC
+=========================================================== */
+
+function refreshTable() {
+  const tbody = document.getElementById("layerTable");
+  tbody.innerHTML = "";
+
+  layers.forEach((l, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${l.type == "percent" ? "Zone %" : "Price"}</td>
+      <td>${l.value}</td>
+      <td>${l.portion}%</td>
+      <td>${l.stopTP}</td>
+      <td>
+        <div class="action-buttons">
+        <button class="action-btn action-edit"  onclick="editLayer(${i})">Modify</button>
+        <button class="action-btn action-delete" onclick="deleteLayer(${i})">Remove</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+  if (layers.length > 0){
+    document.getElementById("riskRewardCard").style.visibility="visible"
+    document.getElementById("layersList").style.visibility="visible"
+    computeRiskReward();
+  }
+
+
+}
+
+function editLayer(i) {
+  const card = document.getElementById('card_form');
+  card.classList.add('highlight-form');
+  setTimeout(() => card.classList.remove('highlight-form'), 800);
+
+  const l = layers[i];
+  editingIndex = i;
+
+  labelLayerValue.textContent = l.type === "percent" ? "% of the zone*" : "Price*";
+  layerType.value = l.type;
+  layerValue.value = l.value;
+  layerPortion.value = l.portion;
+  layerStopTP.value = l.stopTP;
+
+  layerType.value = type;  //To keep same editing
+}
+
+function deleteLayer(i) {
+  layers.splice(i, 1);
+  refreshTable();
+}
+
+document.getElementById("saveLayer").addEventListener("click", () => {
+  const type = layerType.value;
+  const value = parseFloat(layerValue.value);
+  const portion = parseFloat(layerPortion.value);
+  const stopTP = parseInt(layerStopTP.value);
+
+  if (isNaN(value) || isNaN(portion) || isNaN(stopTP)) {
+    alert("Fill all required values");
+    return;
+  }
+
+  const layer = { type, value, portion, stopTP };
+
+  if (editingIndex !== null) {
+    layers[editingIndex] = layer;
+    editingIndex = null;
+    layerType.value = type;
+    layerValue.value=null;
+    layerPortion.value=null, 
+    layerStopTP.value=null
+  } else {
+    layers.push(layer);
+  }
+  layerType.value = type;  //To keep same editing
+  refreshTable();
+});
+
+/* ===========================================================
+   RISK/REWARD FOR CUSTOM LAYERS
+=========================================================== */
+
+function computeRiskReward() {
+  const { totalRisk, rewards, totalVolume } = computeRiskRewardForLayers(layers);
+  const riskEur = totalRisk * AVERAGE_LOSS_PIP_VALUE * totalVolume;
+  let html = "";
+  html += `
+<div class="rr-box rr-risk">
+  <div class="rr-badge">Risk</div>
+  ${totalRisk.toFixed(2)} pips<br>
+  (~${riskEur.toFixed(2)}€)
+</div>
+`;
+  Object.keys(rewards).forEach((tp,index) =>{
+    const rewardEur = rewards[tp] * AVERAGE_GAIN_PIP_VALUE * totalVolume;
+  html += `
+  <div class="rr-box rr-reward">
+    <div class="rr-badge">Reward at TP${index + 1}</div>
+    ${rewards[tp].toFixed(2)} pips<br>
+    (~${rewardEur.toFixed(2)}€)
+  </div>
+  `;
+  })
+
+  document.getElementById("riskReward").innerHTML = html;
+}
+
+document.getElementById("refreshRR").addEventListener("click", computeRiskReward);
+
+/* Label switching */
+const layerType = document.getElementById("layerType");
+const labelLayerValue = document.getElementById("labelLayerValue");
+layerType.addEventListener("change", e => {
+  labelLayerValue.textContent =
+    e.target.value === "percent" ? "% of the zone*" : "Price*";
+});
+
+function onValueChange(){
+    computeFixedScheme('10layers');
+    computeFixedScheme('6layers')
+    computeFixedScheme('single')
+
+}
+document.getElementById("entryStart").addEventListener("change",onValueChange)
+document.getElementById("entryEnd").addEventListener("change",onValueChange)
+document.getElementById("stopLoss").addEventListener("change",onValueChange)
+document.getElementById("tpList").addEventListener("change",onValueChange)
+document.getElementById("pipSize").addEventListener("change",onValueChange)
+document.getElementById("totalVolume").addEventListener("change",onValueChange)
+
+function updateTPDropdown() {
+  const layerStopTP = document.getElementById("layerStopTP");
+  const tps = tpListEl.value.split(",").map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  layerStopTP.innerHTML = "";
+  tps.forEach(tp => {
+    const option = document.createElement("option");
+    option.value = tp;
+    option.textContent = tp;
+    layerStopTP.appendChild(option);
+  });
+}
+tpListEl.addEventListener("change", updateTPDropdown);
+
+window.onload = () => {
+  computeFixedScheme('single');
+  computeFixedScheme('6layers');
+  computeFixedScheme('10layers');
+  updateTPDropdown()
+};
+</script>
+
+</body>
+</html>
