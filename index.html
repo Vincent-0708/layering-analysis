@@ -1,0 +1,265 @@
+<!-- Mostly auto generated code using chatgpt-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Layering Analysis</title>
+<style>
+body {
+font-family: Inter, sans-serif;
+background: #f5f6fa;
+padding: 20px;
+color: #222;
+}
+.card {
+background: white;
+padding: 20px;
+border-radius: 12px;
+box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+margin-bottom: 20px;
+}
+h2 {
+margin-top: 0;
+}
+input, select, button {
+padding: 10px;
+border-radius: 8px;
+border: 1px solid #ccc;
+width: 100%;
+margin-bottom: 10px;
+}
+table {
+width: 100%;
+border-collapse: collapse;
+margin-top: 15px;
+}
+th, td {
+padding: 10px;
+border-bottom: 1px solid #ddd;
+}
+button {
+cursor: pointer;
+background: #4a6cf7;
+color: white;
+font-weight: bold;
+}
+button.delete {
+background: #d9534f;
+}
+button.edit {
+background: #f0ad4e;
+}
+.row {
+display: flex;
+gap: 15px;
+}
+.row > div {
+flex: 1;
+}
+.risk-box {
+font-weight: bold;
+padding: 10px;
+background: #eef3ff;
+border-radius: 8px;
+display: inline-block;
+margin-top: 10px;
+}
+.highlight-form {
+border: 2px solid #4a6cf7;
+padding: 18px;
+border-radius: 12px;
+animation: pulse 0.8s ease;
+}
+@keyframes pulse {
+0% { box-shadow: 0 0 0 rgba(74,108,247,0.0); }
+50% { box-shadow: 0 0 12px rgba(74,108,247,0.6); }
+100% { box-shadow: 0 0 0 rgba(74,108,247,0.0); }
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Trade parameters</h2>
+  <div class="row">
+    <div>
+      <label>Entry Zone Start Price</label>
+      <input id="entryStart" type="number" step="0.00001" />
+    </div>
+    <div>
+      <label>Entry Zone End Price</label>
+      <input id="entryEnd" type="number" step="0.00001" />
+    </div>
+  </div>
+  <label>Stop Loss</label>
+  <input id="stopLoss" type="number" step="0.00001" />
+  <label>Take Profits (separated with comma)</label>
+  <input id="tpList" type="text" placeholder="Ex: 1.0500, 1.0600" />
+  <label>Pip Size (ex: for gold, pip size = 0.01)</label>
+  <input id="pipSize" type="number" step="0.0000001" value="0.01" />
+</div>
+
+<div class="card">
+  <h2>Add / Modify Layer</h2>
+
+  <label>Type</label>
+  <select id="layerType">
+    <option value="percent">% of the zone</option>
+    <option value="price">Absolute Price</option>
+  </select>
+
+  <label>Value</label>
+  <input id="layerValue" type="number" step="0.00001" />
+
+  <label>Portion (%)</label>
+  <input id="layerPortion" type="number" min="1" max="100" />
+
+  <button id="saveLayer">Save</button>
+</div>
+
+<div class="card">
+  <h2>Layers</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Value</th>
+        <th>Portion (%)</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="layerTable"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Risk & Rewards</h2>
+  <div id="riskReward"></div>
+</div>
+
+<script>
+let layers = [];
+let editingIndex = null;
+let lastTypeSelected = "percent";
+
+function refreshTable() {
+  const tbody = document.getElementById("layerTable");
+  tbody.innerHTML = "";
+
+  layers.forEach((l, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${l.type == "percent" ? "Zone percentage": "Price"}</td>
+      <td>${l.value}</td>
+      <td>${l.portion}%</td>
+      <td>
+        <button class="edit" onclick="editLayer(${i})">Modify</button>
+        <button class="delete" onclick="deleteLayer(${i})">Remove</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+  computeRiskReward();
+}
+
+function editLayer(i) {
+  const layerCard = document.querySelector('.card:nth-of-type(2)');
+layerCard.classList.add('highlight-form');
+setTimeout(() => layerCard.classList.remove('highlight-form'), 800);
+    const l = layers[i];
+    editingIndex = i;
+
+
+    document.getElementById("layerType").value = l.type;
+    document.getElementById("layerValue").value = l.value;
+    document.getElementById("layerPortion").value = l.portion;
+
+
+    lastTypeSelected = l.type;
+}
+
+function deleteLayer(i) {
+  layers.splice(i, 1);
+  refreshTable();
+}
+
+document.getElementById("layerType").addEventListener("change", e => {
+  lastTypeSelected = e.target.value;
+});
+
+function computeRiskReward() {
+  const entryStart = parseFloat(document.getElementById("entryStart").value);
+  const entryEnd = parseFloat(document.getElementById("entryEnd").value);
+  const sl = parseFloat(document.getElementById("stopLoss").value);
+  const pipSize = parseFloat(document.getElementById("pipSize").value);
+  const multiplier = 1 / pipSize;
+
+  if (!entryStart || !entryEnd || !sl || !pipSize) return;
+
+  const tps = document.getElementById("tpList").value
+    .split(",")
+    .map(v => parseFloat(v.trim()))
+    .filter(v => !isNaN(v));
+
+  let html = "";
+  let totalRisk = 0
+  layers.forEach(l => {
+    const portion = l.portion / 100;
+    let activationPrice = l.type === "percent"
+      ? entryStart + (parseFloat(l.value) / 100) * (entryEnd - entryStart)
+      : parseFloat(l.value);
+
+    const risk = Math.abs(activationPrice - sl) * multiplier * portion;
+    totalRisk += risk;
+  });
+    html += `<div class='risk-box'> total risk = ${totalRisk.toFixed(2)} pips </div><br/>`;
+
+  tps.forEach(tp => {
+    let totalReward = 0;
+
+    layers.forEach(l => {
+      let activationPrice = l.type === "percent"
+        ? entryStart + (parseFloat(l.value) / 100) * (entryEnd - entryStart)
+        : parseFloat(l.value);
+
+      const portion = l.portion / 100;
+
+      const reward = Math.abs(tp - activationPrice) * multiplier * portion;
+
+      totalReward += reward;
+    });
+
+    html += `<div class='risk-box'>TP ${tp} expected gain = ${totalReward.toFixed(2)} pips</div><br/>`;
+  });
+
+
+  document.getElementById("riskReward").innerHTML = html;
+}
+
+document.getElementById("saveLayer").addEventListener("click", () => {
+  const type = document.getElementById("layerType").value;
+  const value = parseFloat(document.getElementById("layerValue").value);
+  const portion = parseFloat(document.getElementById("layerPortion").value);
+
+  if (!value || !portion) return;
+
+  const layer = { type, value, portion };
+
+  if (editingIndex !== null) {
+    layers[editingIndex] = layer;
+    editingIndex = null;
+    document.getElementById("layerValue").value = null;
+    document.getElementById("layerPortion").value = null;
+  } else {
+    layers.push(layer);
+  }
+
+  // Apply remembered type for next layer
+  document.getElementById("layerType").value = lastTypeSelected;
+
+  refreshTable();
+});
+</script>
+</body>
+</html>
