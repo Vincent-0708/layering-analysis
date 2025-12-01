@@ -76,6 +76,11 @@ animation: pulse 0.8s ease;
 50% { box-shadow: 0 0 12px rgba(74,108,247,0.6); }
 100% { box-shadow: 0 0 0 rgba(74,108,247,0.0); }
 }
+.disclaimer {
+  visibility: hidden
+};
+
+</style>
 </style>
 </head>
 <body>
@@ -95,9 +100,11 @@ animation: pulse 0.8s ease;
   <label>Stop Loss</label>
   <input id="stopLoss" type="number" step="0.00001" />
   <label>Take Profits (separated with comma)</label>
-  <input id="tpList" type="text" placeholder="Ex: 1.0500, 1.0600" />
-  <label>Pip Size (ex: for gold, pip size = 0.01)</label>
-  <input id="pipSize" type="number" step="0.0000001" value="0.01" />
+  <input id="tpList" type="text" placeholder="Ex: 1.0500, 1.0600 - use dot for decimals" />
+  <label>Pip Size </label>
+  <input id="pipSize" type="number" step="0.0000001" placeholder="ex: for gold, pip size = 0.01" />
+  <label>Total lot size</label>
+  <input id="totalVolume" type="number" step="0.01" placeholder="0.1" value="0.1" />
 </div>
 
 <div class="card">
@@ -112,7 +119,7 @@ animation: pulse 0.8s ease;
   <label>Value</label>
   <input id="layerValue" type="number" step="0.00001" />
 
-  <label>Portion (%)</label>
+  <label>Portion of total lot(%)</label>
   <input id="layerPortion" type="number" min="1" max="100" />
 
   <button id="saveLayer">Save</button>
@@ -137,11 +144,14 @@ animation: pulse 0.8s ease;
   <h2>Risk & Rewards</h2>
   <div id="riskReward"></div>
 </div>
+<p class="disclaimer" id="disclaimer"> * The values in $ are only estimations, the conversion to move from pips to financial impact on your account depends on your broker settings. The conversion ration used for computations is 0.8625 $ / pip for a lot size of 1 </p>
 
 <script>
 let layers = [];
 let editingIndex = null;
 let lastTypeSelected = "percent";
+const AVERAGE_GAIN_PIP_VALUE = 0.8625
+const AVERAGE_LOSS_PIP_VALUE = 0.8625
 
 function refreshTable() {
   const tbody = document.getElementById("layerTable");
@@ -203,7 +213,8 @@ function computeRiskReward() {
     .filter(v => !isNaN(v));
 
   let html = "";
-  let totalRisk = 0
+  let totalRiskPips = 0
+  let totalRiskDollars = 0
   layers.forEach(l => {
     const portion = l.portion / 100;
     let activationPrice = l.type === "percent"
@@ -211,12 +222,14 @@ function computeRiskReward() {
       : parseFloat(l.value);
 
     const risk = Math.abs(activationPrice - sl) * multiplier * portion;
-    totalRisk += risk;
+    totalRiskPips += risk;
   });
-    html += `<div class='risk-box'> total risk = ${totalRisk.toFixed(2)} pips </div><br/>`;
+  totalRiskDollars = totalRiskPips * AVERAGE_LOSS_PIP_VALUE * parseFloat(document.getElementById("totalVolume").value);
+    html += `<div class='risk-box'> Total risk = ${totalRiskPips.toFixed(2)} pips (~${totalRiskDollars.toFixed(2)} $*) </div><br/>`;
 
   tps.forEach(tp => {
-    let totalReward = 0;
+    let totalRewardPips = 0;
+    let totalRewardDollars = 0;
 
     layers.forEach(l => {
       let activationPrice = l.type === "percent"
@@ -227,14 +240,16 @@ function computeRiskReward() {
 
       const reward = Math.abs(tp - activationPrice) * multiplier * portion;
 
-      totalReward += reward;
+      totalRewardPips += reward;
     });
+    totalRewardDollars = totalRewardPips * AVERAGE_GAIN_PIP_VALUE * parseFloat(document.getElementById("totalVolume").value);
 
-    html += `<div class='risk-box'>TP ${tp} expected gain = ${totalReward.toFixed(2)} pips</div><br/>`;
+    html += `<div class='risk-box'>TP ${tp} expected gain = ${totalRewardPips.toFixed(2)} pips (~${totalRewardDollars.toFixed(2)} $*)</div><br/>`;
   });
 
 
   document.getElementById("riskReward").innerHTML = html;
+  document.getElementById("disclaimer").style.visibility = "visible";
 }
 
 document.getElementById("saveLayer").addEventListener("click", () => {
