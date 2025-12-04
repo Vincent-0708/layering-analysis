@@ -121,6 +121,8 @@ animation: pulse 0.8s ease;
 
   <label>Portion of total lot(%)</label>
   <input id="layerPortion" type="number" min="1" max="100" />
+  <label>Stop at TP index (optional)</label>
+  <input id="layerStopTP" type="number" min="1" placeholder="Ex: 2 = stops after 2nd TP" />
 
   <button id="saveLayer">Save</button>
 </div>
@@ -133,6 +135,7 @@ animation: pulse 0.8s ease;
         <th>Type</th>
         <th>Value</th>
         <th>Portion (%)</th>
+        <th>Stops at TP</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -163,6 +166,7 @@ function refreshTable() {
       <td>${l.type == "percent" ? "Zone percentage": "Price"}</td>
       <td>${l.value}</td>
       <td>${l.portion}%</td>
+      <td>${l.stopTP ? "Until TP " + l.stopTP : "All"}</td>
       <td>
         <button class="edit" onclick="editLayer(${i})">Modify</button>
         <button class="delete" onclick="deleteLayer(${i})">Remove</button>
@@ -226,12 +230,15 @@ function computeRiskReward() {
   });
   totalRiskDollars = totalRiskPips * AVERAGE_LOSS_PIP_VALUE * parseFloat(document.getElementById("totalVolume").value);
     html += `<div class='risk-box'> Total risk = ${totalRiskPips.toFixed(2)} pips (~${totalRiskDollars.toFixed(2)} $*) </div><br/>`;
-
-  tps.forEach(tp => {
+  totalRewardAtMaxInPips = 0;
+  totalRewardAtMaxInDollars = 0;
+  tps.forEach((tp, index) => {
     let totalRewardPips = 0;
     let totalRewardDollars = 0;
+    const tpIndex = index + 1;
 
     layers.forEach(l => {
+      if (l.stopTP !== null && l.stopTP < tpIndex) return;
       let activationPrice = l.type === "percent"
         ? entryStart + (parseFloat(l.value) / 100) * (entryEnd - entryStart)
         : parseFloat(l.value);
@@ -243,9 +250,11 @@ function computeRiskReward() {
       totalRewardPips += reward;
     });
     totalRewardDollars = totalRewardPips * AVERAGE_GAIN_PIP_VALUE * parseFloat(document.getElementById("totalVolume").value);
-
+    totalRewardAtMaxInPips += totalRewardPips;
+    totalRewardAtMaxInDollars += totalRewardDollars;
     html += `<div class='risk-box'>TP ${tp} expected gain = ${totalRewardPips.toFixed(2)} pips (~${totalRewardDollars.toFixed(2)} $*)</div><br/>`;
   });
+  html += `<div class='risk-box'>Expected reward at max TP = ${totalRewardAtMaxInPips.toFixed(2)} pips (~${totalRewardAtMaxInDollars.toFixed(2)} $*)</div><br/>`;
 
 
   document.getElementById("riskReward").innerHTML = html;
@@ -256,16 +265,18 @@ document.getElementById("saveLayer").addEventListener("click", () => {
   const type = document.getElementById("layerType").value;
   const value = parseFloat(document.getElementById("layerValue").value);
   const portion = parseFloat(document.getElementById("layerPortion").value);
+  const stopTP = parseInt(document.getElementById("layerStopTP").value);
 
   if (!value || !portion) return;
 
-  const layer = { type, value, portion };
+  const layer = { type, value, portion, stopTP: isNaN(stopTP) ? null : stopTP };
 
   if (editingIndex !== null) {
     layers[editingIndex] = layer;
     editingIndex = null;
     document.getElementById("layerValue").value = null;
     document.getElementById("layerPortion").value = null;
+    document.getElementById("layerStopTP").value = "";
   } else {
     layers.push(layer);
   }
