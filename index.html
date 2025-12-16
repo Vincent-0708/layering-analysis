@@ -378,6 +378,11 @@ button:hover {
   color: var(--success-text);
   border: 1px solid #b3e8bd;
 }
+.rr-explanation{
+  text-align: justify;
+  font-size: 14px;
+  margin-bottom: 30px;
+}
 
 /* ======================================================
    TABLE
@@ -656,7 +661,7 @@ th, td {
   <h2 class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
     Risk & Rewards
     <button id="refreshRR" style="width:auto;">Refresh</button>
-  </h2>
+  </h2><p class="rr-explanation">Based on your trade settings above - change them and refresh to update values</p>
   <div class="rr-container" id="riskReward"></div>
 </div>
 </section>
@@ -792,7 +797,6 @@ function computeFixedScheme(type) {
     type === "single" ? "result_single" :
     type === "6layers" ? "result_6layers" : "result_10layers"
   );
-console.log(rewards)
 let html = `<div class="rr-container">`;
 
 // RISK BOX
