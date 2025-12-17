@@ -960,7 +960,7 @@ document.getElementById("saveLayer").addEventListener("click", () => {
   const type = layerType.value;
   const value = parseFloat(layerValue.value);
   const portion = parseFloat(layerPortion.value);
-  const stopTP = parseInt(layerStopTP.value);
+  const stopTP = parseFloat(layerStopTP.value);
 
   if (isNaN(value) || isNaN(portion) || isNaN(stopTP)) {
     alert("Fill all required values");
