@@ -23,6 +23,7 @@
 
   --primary: #4169e1;
   --primary-dark: #3556c7;
+  --primary-light:#2d9cdb;
 
   --border-soft: #e5e7eb;
 
@@ -271,7 +272,7 @@ section h2 {
   box-shadow: 0 10px 30px rgba(15,23,42,0.06);
   margin-bottom: 32px;
 }
-
+.highlight-form { border: 2px solid #4a6cf7; padding: 18px; border-radius: 12px; animation: pulse 0.8s ease; } @keyframes pulse { 0% { box-shadow: 0 0 0 rgba(74,108,247,0.0); } 50% { box-shadow: 0 0 12px rgba(74,108,247,0.6); } 100% { box-shadow: 0 0 0 rgba(74,108,247,0.0); } }
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -356,6 +357,10 @@ button:hover {
   border-radius: 16px;
   box-shadow: 0 10px 28px rgba(65,105,225,0.35);
   transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.contact-button{
+  background:var(--primary-light);
 }
 
 .cta-button:hover {
@@ -497,6 +502,10 @@ th, td {
 #layersList{
     visibility: hidden;
 }
+
+.block{
+  margin-bottom: 40px;
+}
 </style>
 </head>
 
@@ -551,8 +560,7 @@ th, td {
 <div class="cta-container" style="margin:40px 0;">
   <a href="https://t.me/vincentflt?text=I+want+to+see+Layoo+in+action"
      target="_blank"
-     class="cta-button"
-     style="background:#2d9cdb;">
+     class="cta-button contact-button">
     <img src="logo.ico" class="cta-logo" alt="Layoo">
     <span>Get Access to Layoo - 7 Days Free Demo</span>
   </a>
@@ -729,13 +737,19 @@ th, td {
 <div class="block" id ="riskRewardCard">
   <h2 class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
     Risk & Rewards
-    <button id="refreshRR" style="width:auto;">Refresh</button>
+    <div class="tooltip-wrapper">
+    <button id="refreshRR" style="width:auto;" class="util-button">🔄️ Refresh</button>
+    <div class="tooltip" id="refreshTooltip">
+    Recalculate risk and reward using the current trade settings.
+    Use this after changing layers or trade parameters (SL, TPs, zone limits).
+  </div>
+</div>
   </h2><p class="rr-explanation">Based on your trade settings above - change them and refresh to update values</p>
   <div class="rr-container" id="riskReward"></div>
 </div>
 </section>
 <div class="cta-container">
-  <a href="https://t.me/vincentflt?text=I+want+to+try+Layoo%21" target="_blank" class="cta-button">
+  <a href="https://t.me/vincentflt?text=I+want+to+try+Layoo%21" target="_blank" class="cta-button contact-button">
     <img src="logo.ico" alt="Layoo Logo" class="cta-logo">
     <span>Start Layering with Layoo - 7 Days Free Demo</span>
   </a>
@@ -911,6 +925,7 @@ function refreshTable() {
 
   layers.forEach((l, i) => {
     const tr = document.createElement("tr");
+    console.log(l.stopTP)
     tr.innerHTML = `
       <td>${l.type == "percent" ? "Zone %" : "Price"}</td>
       <td>${l.value}</td>
@@ -941,6 +956,7 @@ function editLayer(i) {
 
   const l = layers[i];
   editingIndex = i;
+  console.log(l)
 
   labelLayerValue.textContent = l.type === "percent" ? "% of the zone*" : "Price*";
   layerType.value = l.type;
